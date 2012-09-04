@@ -1,4 +1,4 @@
-package jimboeh;
+package br.inf.pucrio.jimboeh;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;

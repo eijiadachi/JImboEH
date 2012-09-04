@@ -1,9 +1,7 @@
-package jimboeh.popup.actions;
+package br.inf.pucrio.jimboeh.popup.actions;
 
 import java.io.IOException;
 
-import jimboeh.Activator;
-import jimboeh.util.UtilAST;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -27,6 +25,9 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
+
+import br.inf.pucrio.jimboeh.Activator;
+import br.inf.pucrio.jimboeh.util.UtilAST;
 
 public class SearchAction implements IEditorActionDelegate
 {

@@ -1,4 +1,4 @@
-package jimboeh.util;
+package br.inf.pucrio.jimboeh.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
