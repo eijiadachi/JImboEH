@@ -1,7 +1,7 @@
 package br.inf.pucrio.jimboeh.popup.actions;
 
 import java.io.IOException;
-
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -19,15 +19,19 @@ import org.eclipse.ui.IEditorActionDelegate;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 import br.inf.pucrio.jimboeh.Activator;
+import br.inf.pucrio.jimboeh.JImboEHFacade;
 import br.inf.pucrio.jimboeh.util.UtilAST;
+import br.inf.pucrio.jimboeh.views.SearchResultView;
 
 public class SearchAction implements IEditorActionDelegate
 {
@@ -36,13 +40,19 @@ public class SearchAction implements IEditorActionDelegate
 
 	private IEditorPart getActiveEditor()
 	{
-		final IWorkbench workbench = PlatformUI.getWorkbench();
-		final IWorkbenchWindow activeWorkbenchWindow = workbench.getActiveWorkbenchWindow();
-		final IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+		final IWorkbenchPage activePage = getActivePage();
 
 		final IEditorPart activeEditor = activePage.getActiveEditor();
 
 		return activeEditor;
+	}
+
+	private IWorkbenchPage getActivePage()
+	{
+		final IWorkbench workbench = PlatformUI.getWorkbench();
+		final IWorkbenchWindow activeWorkbenchWindow = workbench.getActiveWorkbenchWindow();
+		final IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+		return activePage;
 	}
 
 	private IFile getCurrentFile(final IEditorPart targetEditor)
@@ -99,6 +109,17 @@ public class SearchAction implements IEditorActionDelegate
 		return textSelection;
 	}
 
+	private SearchResultView getSearchResultView() throws PartInitException
+	{
+		final IWorkbenchPage activePage = getActivePage();
+
+		final IViewPart showedView = activePage.showView( SearchResultView.ID );
+
+		final SearchResultView resultView = (SearchResultView) showedView;
+
+		return resultView;
+	}
+
 	@Override
 	public void run(final IAction action)
 	{
@@ -108,8 +129,13 @@ public class SearchAction implements IEditorActionDelegate
 
 			final MethodDeclaration currentMethodDeclaration = getCurrentMethodDeclaration( file, textSelection );
 
-			MessageDialog.openInformation( null, "JImboEH",
-					"Search Action was executed." + currentMethodDeclaration.getName() );
+			final List<String> recommendations = JImboEHFacade.recommend( currentMethodDeclaration );
+
+			final SearchResultView resultView = getSearchResultView();
+
+			resultView.setContent( recommendations );
+
+			MessageDialog.openInformation( null, "JImboEH", "Search Action was executed." );
 		}
 		catch (final IOException e)
 		{

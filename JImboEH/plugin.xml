@@ -23,4 +23,38 @@
          </action>
       </viewerContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="JImboEH"
+            name="JImboEH">
+      </category>
+      <view
+            category="JImboEH"
+            class="br.inf.pucrio.jimboeh.views.SearchResultView"
+            icon="icons/sample.gif"
+            id="jimboeh.views.SearchResultView"
+            name="Recommendations View">
+      </view>
+      <view
+            category="JImboEH"
+            class="br.inf.pucrio.jimboeh.views.SearchResultView"
+            icon="icons/sample.gif"
+            id="jimboeh.views.DetailedResultView"
+            name="Detailed Result"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               id="jimboeh.views.SearchResultView"
+               ratio="0.5"
+               relationship="right"
+               relative="org.eclipse.ui.views.ProblemView">
+         </view>
+      </perspectiveExtension>
+   </extension>
 </plugin>
