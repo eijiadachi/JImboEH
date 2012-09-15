@@ -92,6 +92,8 @@ public class SearchResultView extends ViewPart
 
 	private List<String> content;
 
+	static int x = 0;
+
 	public SearchResultView()
 	{
 	}
@@ -135,7 +137,10 @@ public class SearchResultView extends ViewPart
 				{
 					final DetailedResultView detailedResultView = UtilUI.getDetailedResultView();
 
-					detailedResultView.setContent( obj.toString() );
+					final String str = "public static void foo();" + x++;
+					;
+
+					detailedResultView.setContent( str );
 				}
 				catch (final PartInitException e)
 				{

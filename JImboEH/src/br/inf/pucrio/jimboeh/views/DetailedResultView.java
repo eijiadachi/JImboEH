@@ -1,13 +1,21 @@
 package br.inf.pucrio.jimboeh.views;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -15,6 +23,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
+@SuppressWarnings("restriction")
 public class DetailedResultView extends ViewPart
 {
 
@@ -79,12 +88,25 @@ public class DetailedResultView extends ViewPart
 
 	public static final String ID = "jimboeh.views.DetailedResultView";
 
-	private TableViewer viewer;
+	private SourceViewer viewer;
 
 	private String content;
 
 	public DetailedResultView()
 	{
+	}
+
+	private JavaSourceViewerConfiguration buildViewerConfiguration()
+	{
+		final JavaPlugin plugin = JavaPlugin.getDefault();
+
+		final JavaTextTools javaTextTools = plugin.getJavaTextTools();
+
+		final IPreferenceStore combinedPreferenceStore = plugin.getCombinedPreferenceStore();
+
+		final JavaSourceViewerConfiguration configuration = new JavaSourceViewerConfiguration(
+				javaTextTools.getColorManager(), combinedPreferenceStore, null, null );
+		return configuration;
 	}
 
 	@Override
@@ -100,24 +122,25 @@ public class DetailedResultView extends ViewPart
 
 	private void createSourceViewer(final Composite parent)
 	{
-		viewer = new TableViewer( parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL );
-		viewer.setContentProvider( new ViewContentProvider() );
-		viewer.setLabelProvider( new ViewLabelProvider() );
-		viewer.setSorter( new NameSorter() );
-		viewer.setInput( getViewSite() );
+		final JavaSourceViewerConfiguration configuration = buildViewerConfiguration();
+		final Font font = JFaceResources.getFont( JFaceResources.TEXT_FONT );
+
+		viewer = new SourceViewer( container, null, SWT.BORDER | SWT.V_SCROLL );
+		viewer.configure( configuration );
+		viewer.setEditable( false );
+		viewer.getTextWidget().setWordWrap( false );
+		viewer.getTextWidget().setFont( font );
+
+		final Control viewerControl = viewer.getControl();
+		viewerControl.setLayoutData( GridDataFactory.fillDefaults().grab( true, true ).hint( 200, 300 ).create() );
 	}
 
 	public void setContent(final String content)
 	{
-		final Control control = viewer.getControl();
+		final Document doc = new Document();
+		doc.set( content );
 
-		control.setRedraw( false );
-		viewer.setInput( null );
-		viewer.refresh();
-		control.setRedraw( true );
-
-		this.content = content;
-		viewer.setInput( content );
+		viewer.setDocument( doc );
 	}
 
 	@Override
