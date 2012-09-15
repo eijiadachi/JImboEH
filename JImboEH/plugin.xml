@@ -38,7 +38,7 @@
       </view>
       <view
             category="JImboEH"
-            class="br.inf.pucrio.jimboeh.views.SearchResultView"
+            class="br.inf.pucrio.jimboeh.views.DetailedResultView"
             icon="icons/sample.gif"
             id="jimboeh.views.DetailedResultView"
             name="Detailed Result"

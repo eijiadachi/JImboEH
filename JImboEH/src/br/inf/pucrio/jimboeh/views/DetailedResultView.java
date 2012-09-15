@@ -1,32 +1,21 @@
 package br.inf.pucrio.jimboeh.views;
 
-import java.util.List;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.statushandlers.StatusManager;
 
-import br.inf.pucrio.jimboeh.util.UtilUI;
-
-public class SearchResultView extends ViewPart
+public class DetailedResultView extends ViewPart
 {
 
 	class NameSorter extends ViewerSorter
@@ -45,11 +34,11 @@ public class SearchResultView extends ViewPart
 		{
 			if (content != null)
 			{
-				return content.toArray();
+				return new Object[] { content };
 			}
 			else
 			{
-				return new String[] {};
+				return new Object[] {};
 			}
 		}
 
@@ -70,7 +59,7 @@ public class SearchResultView extends ViewPart
 		@Override
 		public String getColumnText(final Object obj, final int index)
 		{
-			final String baseStr = "public static void %s(String args){\n" + "doThis();" + "}";
+			final String baseStr = "public" + x++;
 
 			final String str = String.format( baseStr, obj );
 
@@ -84,70 +73,41 @@ public class SearchResultView extends ViewPart
 		}
 	}
 
-	public static final String ID = "jimboeh.views.SearchResultView";
+	static int x = 0;
+
+	private ScrolledComposite container;
+
+	public static final String ID = "jimboeh.views.DetailedResultView";
 
 	private TableViewer viewer;
 
-	private Action doubleClickAction;
+	private String content;
 
-	private List<String> content;
-
-	public SearchResultView()
+	public DetailedResultView()
 	{
 	}
 
 	@Override
 	public void createPartControl(final Composite parent)
 	{
+		container = new ScrolledComposite( parent, SWT.H_SCROLL | SWT.V_SCROLL );
+		createSourceViewer( parent );
+		container.setContent( viewer.getControl() );
+		container.setExpandHorizontal( true );
+		container.setExpandVertical( true );
+
+	}
+
+	private void createSourceViewer(final Composite parent)
+	{
 		viewer = new TableViewer( parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL );
 		viewer.setContentProvider( new ViewContentProvider() );
 		viewer.setLabelProvider( new ViewLabelProvider() );
 		viewer.setSorter( new NameSorter() );
 		viewer.setInput( getViewSite() );
-
-		makeActions();
-		hookDoubleClickAction();
 	}
 
-	private void hookDoubleClickAction()
-	{
-		viewer.addDoubleClickListener( new IDoubleClickListener()
-		{
-			@Override
-			public void doubleClick(final DoubleClickEvent event)
-			{
-				doubleClickAction.run();
-			}
-		} );
-	}
-
-	private void makeActions()
-	{
-		doubleClickAction = new Action()
-		{
-			@Override
-			public void run()
-			{
-				final ISelection selection = viewer.getSelection();
-				final Object obj = ((IStructuredSelection) selection).getFirstElement();
-
-				try
-				{
-					final DetailedResultView detailedResultView = UtilUI.getDetailedResultView();
-
-					detailedResultView.setContent( obj.toString() );
-				}
-				catch (final PartInitException e)
-				{
-					final IStatus status = e.getStatus();
-					final StatusManager statusManager = StatusManager.getManager();
-					statusManager.handle( status, StatusManager.SHOW | StatusManager.LOG );
-				}
-			}
-		};
-	}
-
-	public void setContent(final List<String> content)
+	public void setContent(final String content)
 	{
 		final Control control = viewer.getControl();
 
@@ -158,7 +118,6 @@ public class SearchResultView extends ViewPart
 
 		this.content = content;
 		viewer.setInput( content );
-
 	}
 
 	@Override
