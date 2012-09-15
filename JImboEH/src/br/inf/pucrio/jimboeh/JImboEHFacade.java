@@ -18,7 +18,7 @@ public class JImboEHFacade
 		final List<String> result = new ArrayList<String>();
 		for (int i = 0; i < 10; i++)
 		{
-			result.add( nameStr );
+			result.add( nameStr + i );
 		}
 
 		return result;

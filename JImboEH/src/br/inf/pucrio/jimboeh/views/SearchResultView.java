@@ -137,8 +137,7 @@ public class SearchResultView extends ViewPart
 				{
 					final DetailedResultView detailedResultView = UtilUI.getDetailedResultView();
 
-					final String str = "public static void foo();" + x++;
-					;
+					final String str = "public static void foo()\n{\ttry{ bar(); } finally {} \n}" + x++;
 
 					detailedResultView.setContent( str );
 				}
