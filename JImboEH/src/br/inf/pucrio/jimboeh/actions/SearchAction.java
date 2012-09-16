@@ -1,4 +1,4 @@
-package br.inf.pucrio.jimboeh.popup.actions;
+package br.inf.pucrio.jimboeh.actions;
 
 import java.io.IOException;
 import java.util.List;
