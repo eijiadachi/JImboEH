@@ -16,7 +16,7 @@
             </separator>
          </menu>
           <action
-               class="br.inf.pucrio.jimboeh.popup.actions.SearchAction"
+               class="br.inf.pucrio.jimboeh.actions.SearchAction"
                id="JImboEH.SearchAction"
                label="Search"
                menubarPath="JImboEH.menu1/group1">
