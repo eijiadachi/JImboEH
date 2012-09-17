@@ -1,5 +1,6 @@
 package br.inf.pucrio.jimboeh.model;
 
+import java.lang.reflect.Field;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,7 +9,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -16,6 +16,8 @@ import org.eclipse.jdt.core.dom.Type;
 public class MethodContext
 {
 	private Set<String> exceptionsHandled;
+
+	private Set<String> exceptionsOnInterface;
 
 	private Set<String> exceptionsThrown;
 
@@ -33,9 +35,14 @@ public class MethodContext
 
 	private String returnedType;
 
+	private String enclosingClass;
+
+	private String enclosingProject;
+
 	public MethodContext()
 	{
 		this.setExceptionsHandled( new LinkedHashSet<String>() );
+		this.setExceptionsOnInterface( new LinkedHashSet<String>() );
 		this.setExceptionsThrown( new LinkedHashSet<String>() );
 		this.setMethodsCalled( new LinkedHashSet<String>() );
 		this.setVariablesTypesUsed( new LinkedHashSet<String>() );
@@ -58,19 +65,9 @@ public class MethodContext
 
 	}
 
-	public void addExceptionsThrown(final List<Name> thrownExceptions)
+	public void addExceptionOnInterface(final String declaredException)
 	{
-		for (final Name name : thrownExceptions)
-		{
-			final IBinding binding = name.resolveBinding();
-			final String fullyQualifiedName = binding.getName();
-			this.addExceptionThrown( fullyQualifiedName );
-		}
-	}
-
-	public void addExceptionThrown(final String thrownException)
-	{
-		this.getExceptionsThrown().add( thrownException );
+		this.getExceptionsOnInterface().add( declaredException );
 	}
 
 	public void addMethodCalled(final String qualifiedName)
@@ -149,9 +146,24 @@ public class MethodContext
 		this.addVariableTypeUsed( variableStr );
 	}
 
+	public String getEnclosingClass()
+	{
+		return enclosingClass;
+	}
+
+	public String getEnclosingProject()
+	{
+		return enclosingProject;
+	}
+
 	public Set<String> getExceptionsHandled()
 	{
 		return exceptionsHandled;
+	}
+
+	public Set<String> getExceptionsOnInterface()
+	{
+		return exceptionsOnInterface;
 	}
 
 	public Set<String> getExceptionsThrown()
@@ -215,9 +227,24 @@ public class MethodContext
 		return variablesTypesUsed;
 	}
 
+	public void setEnclosingClass(final String enclosingClass)
+	{
+		this.enclosingClass = enclosingClass;
+	}
+
+	public void setEnclosingProject(final String enclosingProject)
+	{
+		this.enclosingProject = enclosingProject;
+	}
+
 	public void setExceptionsHandled(final Set<String> exceptionsHandled)
 	{
 		this.exceptionsHandled = exceptionsHandled;
+	}
+
+	public void setExceptionsOnInterface(final Set<String> exceptionsOnInterface)
+	{
+		this.exceptionsOnInterface = exceptionsOnInterface;
 	}
 
 	public void setExceptionsThrown(final Set<String> exceptionsThrown)
@@ -260,4 +287,29 @@ public class MethodContext
 		this.variablesTypesUsed = variablesTypesUsed;
 	}
 
+	@Override
+	public String toString()
+	{
+		final StringBuilder builder = new StringBuilder();
+		final Field[] declaredFields = MethodContext.class.getDeclaredFields();
+		for (final Field field : declaredFields)
+		{
+			try
+			{
+				final String fieldName = field.getName();
+				final Object fieldValue = field.get( this );
+				final String str = String.format( "%s - %s\n", fieldName, fieldValue );
+				builder.append( str );
+			}
+			catch (final IllegalArgumentException e)
+			{
+				e.printStackTrace();
+			}
+			catch (final IllegalAccessException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return builder.toString();
+	}
 }

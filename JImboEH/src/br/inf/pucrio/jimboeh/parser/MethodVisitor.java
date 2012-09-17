@@ -52,18 +52,23 @@ public class MethodVisitor extends ASTVisitor
 	@Override
 	public boolean visit(final MethodDeclaration node)
 	{
-		// TODO add declaringClass to methodContext
+		// TODO add declaringPackage to methodContext
 		final IMethodBinding binding = node.resolveBinding();
 
 		final String methodName = binding.getName();
 
 		getContext().addMethodName( methodName );
 
+		final ITypeBinding declaringClass = binding.getDeclaringClass();
+		final String classQualifiedName = declaringClass.getQualifiedName();
+
+		getContext().setEnclosingClass( classQualifiedName );
+
 		final ITypeBinding[] exceptionTypes = binding.getExceptionTypes();
 		for (final ITypeBinding typeBinding : exceptionTypes)
 		{
 			final String exceptionQualifiedName = typeBinding.getQualifiedName();
-			getContext().addExceptionThrown( exceptionQualifiedName );
+			getContext().addExceptionOnInterface( exceptionQualifiedName );
 		}
 
 		final Type returnType = node.getReturnType2();
