@@ -1,7 +1,6 @@
 package br.inf.pucrio.jimboeh.actions;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -17,9 +16,9 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 import br.inf.pucrio.jimboeh.Activator;
-import br.inf.pucrio.jimboeh.JImboEHFacade;
+import br.inf.pucrio.jimboeh.model.MethodContext;
+import br.inf.pucrio.jimboeh.parser.MethodVisitor;
 import br.inf.pucrio.jimboeh.util.UtilUI;
-import br.inf.pucrio.jimboeh.views.SearchResultView;
 
 public class SearchAction implements IEditorActionDelegate
 {
@@ -35,11 +34,21 @@ public class SearchAction implements IEditorActionDelegate
 
 			final MethodDeclaration currentMethodDeclaration = UtilUI.getCurrentMethodDeclaration( file, textSelection );
 
-			final List<String> recommendations = JImboEHFacade.recommend( currentMethodDeclaration );
+			final MethodVisitor visitor = new MethodVisitor();
 
-			final SearchResultView resultView = UtilUI.getSearchResultView();
+			currentMethodDeclaration.accept( visitor );
 
-			resultView.setContent( recommendations );
+			final MethodContext context = visitor.getContext();
+
+			StatusManager.getManager().addLoggedStatus(
+					new Status( IStatus.INFO, Activator.PLUGIN_ID, context.toString() ) );
+
+			// final List<String> recommendations = JImboEHFacade.recommend(
+			// currentMethodDeclaration );
+			//
+			// final SearchResultView resultView = UtilUI.getSearchResultView();
+			//
+			// resultView.setContent( recommendations );
 
 			MessageDialog.openInformation( null, "JImboEH", "Search Action was executed." );
 		}
