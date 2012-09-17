@@ -73,11 +73,6 @@ public class MethodVisitor extends ASTVisitor
 
 		final Type returnType = node.getReturnType2();
 
-		// final ITypeBinding returnTypeBinding = returnType.resolveBinding();
-		//
-		// final String returnTypeQualifiedName =
-		// returnTypeBinding.getQualifiedName();
-
 		getContext().addReturnedType( returnType );
 
 		final List<SingleVariableDeclaration> parameters = node.parameters();

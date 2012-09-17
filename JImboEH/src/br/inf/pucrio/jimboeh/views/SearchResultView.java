@@ -2,6 +2,7 @@ package br.inf.pucrio.jimboeh.views;
 
 import java.util.List;
 
+import org.apache.lucene.document.Document;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -70,9 +71,8 @@ public class SearchResultView extends ViewPart
 		@Override
 		public String getColumnText(final Object obj, final int index)
 		{
-			final String baseStr = "public static void %s(String args){\n" + "doThis();" + "}";
-
-			final String str = String.format( baseStr, obj );
+			final Document doc = (Document) obj;
+			final String str = doc.get( "methodName" );
 
 			return str;
 		}
@@ -90,7 +90,7 @@ public class SearchResultView extends ViewPart
 
 	private Action doubleClickAction;
 
-	private List<String> content;
+	private List<Document> content;
 
 	static int x = 0;
 
@@ -132,12 +132,13 @@ public class SearchResultView extends ViewPart
 			{
 				final ISelection selection = viewer.getSelection();
 				final Object obj = ((IStructuredSelection) selection).getFirstElement();
+				final Document doc = (Document) obj;
 
 				try
 				{
 					final DetailedResultView detailedResultView = UtilUI.getDetailedResultView();
 
-					final String str = "public static void foo()\n{\ttry{ bar(); } finally {} \n}" + x++;
+					final String str = doc.get( "snippet" );
 
 					detailedResultView.setContent( str );
 				}
@@ -151,7 +152,7 @@ public class SearchResultView extends ViewPart
 		};
 	}
 
-	public void setContent(final List<String> content)
+	public void setContent(final List<Document> content)
 	{
 		final Control control = viewer.getControl();
 
