@@ -57,4 +57,22 @@
          </view>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="JImboEH.IProjectContribution"
+            objectClass="org.eclipse.jdt.core.IMethod">
+         <menu
+               id="JImboEH.insertMenu"
+               label="JImboEH">
+         </menu>
+         <action
+               class="br.inf.pucrio.jimboeh.actions.InsertAction"
+               id="JImboEH.insertMethodAction"
+               label="Insert method in database"
+               menubarPath="JImboEH.insertMenu/group1">
+         </action>
+      </objectContribution>
+   </extension>
 </plugin>

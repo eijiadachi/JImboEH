@@ -87,12 +87,20 @@ public class MethodVisitor extends ASTVisitor
 	public boolean visit(final MethodInvocation node)
 	{
 		final IMethodBinding methodBinding = node.resolveMethodBinding();
+		final String fullyQualifiedName;
+		if (methodBinding == null)
+		{
+			final SimpleName name = node.getName();
+			fullyQualifiedName = name.getFullyQualifiedName();
+		}
+		else
+		{
+			final ITypeBinding declaringClassBinding = methodBinding.getDeclaringClass();
 
-		final ITypeBinding declaringClassBinding = methodBinding.getDeclaringClass();
+			fullyQualifiedName = declaringClassBinding.getQualifiedName();
+		}
 
-		final String qualifiedName = declaringClassBinding.getQualifiedName();
-
-		getContext().addMethodCalled( qualifiedName );
+		getContext().addMethodCalled( fullyQualifiedName );
 
 		final List<Expression> arguments = node.arguments();
 

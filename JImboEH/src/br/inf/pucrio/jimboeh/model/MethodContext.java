@@ -129,7 +129,15 @@ public class MethodContext
 		for (final Expression argument : arguments)
 		{
 			final ITypeBinding typeBinding = argument.resolveTypeBinding();
-			final String qualifiedName = typeBinding.getQualifiedName();
+			final String qualifiedName;
+			if (typeBinding == null)
+			{
+				qualifiedName = argument.toString();
+			}
+			else
+			{
+				qualifiedName = typeBinding.getQualifiedName();
+			}
 			this.addVariableTypeUsed( qualifiedName );
 		}
 
@@ -208,6 +216,10 @@ public class MethodContext
 	private String getQualifiedName(final Type type)
 	{
 		final ITypeBinding binding = type.resolveBinding();
+		if (binding == null)
+		{
+			return type.toString();
+		}
 		final String qualifiedName = binding.getQualifiedName();
 		return qualifiedName;
 	}
