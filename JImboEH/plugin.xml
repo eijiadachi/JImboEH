@@ -61,17 +61,35 @@
          point="org.eclipse.ui.popupMenus">
       <objectContribution
             adaptable="true"
-            id="JImboEH.IProjectContribution"
+            id="JImboEH.IMethod"
             objectClass="org.eclipse.jdt.core.IMethod">
          <menu
-               id="JImboEH.insertMenu"
+               id="JImboEH.insertMethodMenu"
                label="JImboEH">
          </menu>
          <action
                class="br.inf.pucrio.jimboeh.actions.InsertAction"
                id="JImboEH.insertMethodAction"
                label="Insert method in database"
-               menubarPath="JImboEH.insertMenu/group1">
+               menubarPath="JImboEH.insertMethodMenu/group1">
+         </action>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="JImboEH.IProjectContribution"
+            objectClass="org.eclipse.core.resources.IProject">
+         <menu
+               id="JImboEH.InsertProjectMenu"
+               label="JImboEH">
+         </menu>
+         <action
+               class="br.inf.pucrio.jimboeh.actions.InsertAction"
+               id="JImboEH.insertProjectAction"
+               label="Insert project in database"
+               menubarPath="JImboEH.InsertProjectMenu/group1">
          </action>
       </objectContribution>
    </extension>
