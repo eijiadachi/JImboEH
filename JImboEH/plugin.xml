@@ -93,4 +93,22 @@
          </action>
       </objectContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="JImboEH.ICompilationUnitContribution"
+            objectClass="org.eclipse.jdt.core.ICompilationUnit">
+         <menu
+               id="JImboEH.InsertClassMenu"
+               label="JImboEH">
+         </menu>
+         <action
+               class="br.inf.pucrio.jimboeh.actions.InsertAction"
+               id="JImboEH.InsertClassAction"
+               label="Insert class in database"
+               menubarPath="JImboEH.InsertClassMenu/group1">
+         </action>
+      </objectContribution>
+   </extension>
 </plugin>
