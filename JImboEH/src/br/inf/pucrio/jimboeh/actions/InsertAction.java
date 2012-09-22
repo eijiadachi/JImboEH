@@ -2,7 +2,10 @@ package br.inf.pucrio.jimboeh.actions;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -24,9 +27,47 @@ public class InsertAction implements IObjectActionDelegate
 
 	private ISelection selection;
 
-	private void insertSelection(final Object[] result)
+	private void insertSelectedElement(final IMethod method) throws JavaModelException
 	{
-		// TODO Auto-generated method stub
+		final MethodDeclaration methodNode = UtilAST.astNode( method );
+
+		final MethodVisitor visitor = new MethodVisitor();
+
+		methodNode.accept( visitor );
+
+		final MethodContext context = visitor.getContext();
+
+		final String contextStr = context.toString();
+
+		final String methodName = method.getElementName();
+
+		final String message = String.format( "Inserting method: %s\n\n%s", methodName, contextStr );
+
+		MessageDialog.openInformation( null, "JImboEH", message );
+	}
+
+	private void processSelection(final Object[] result) throws JavaModelException
+	{
+		for (final Object object : result)
+		{
+			if (object instanceof IMethod)
+			{
+				final IMethod method = (IMethod) object;
+				insertSelectedElement( method );
+			}
+			else if (object instanceof IParent)
+			{
+				final IParent element = (IParent) object;
+				final IJavaElement[] children = element.getChildren();
+
+				for (final IJavaElement child : children)
+				{
+					final Object[] selectedChild = new Object[] { child };
+					processSelection( selectedChild );
+				}
+
+			}
+		}
 
 	}
 
@@ -43,15 +84,7 @@ public class InsertAction implements IObjectActionDelegate
 			{
 				final IMethod selectedMethod = (IMethod) firstElement;
 
-				final MethodDeclaration methodNode = UtilAST.astNode( selectedMethod );
-
-				final MethodVisitor visitor = new MethodVisitor();
-
-				methodNode.accept( visitor );
-
-				final MethodContext context = visitor.getContext();
-
-				MessageDialog.openInformation( null, "JImboEH", context.toString() );
+				insertSelectedElement( selectedMethod );
 			}
 			else
 			{
@@ -62,12 +95,7 @@ public class InsertAction implements IObjectActionDelegate
 				{
 					final Object[] result = dialog.getResult();
 
-					insertSelection( result );
-
-					for (final Object object : result)
-					{
-						MessageDialog.openInformation( null, "JImboEH", object.getClass().getName() );
-					}
+					processSelection( result );
 				}
 			}
 
