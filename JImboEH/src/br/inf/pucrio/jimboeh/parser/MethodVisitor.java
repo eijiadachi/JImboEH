@@ -45,6 +45,30 @@ public class MethodVisitor extends ASTVisitor
 
 		getContext().addVariableTypeUsed( variable );
 
+		final IMethodBinding constructorBinding = node.resolveConstructorBinding();
+
+		final ITypeBinding[] exceptionTypes = constructorBinding.getExceptionTypes();
+		for (final ITypeBinding iTypeBinding : exceptionTypes)
+		{
+			final String name = iTypeBinding.getQualifiedName();
+			getContext().addExceptionThrown( name );
+		}
+
+		final ITypeBinding declaringClass = constructorBinding.getDeclaringClass();
+		final String classQualifiedName = declaringClass.getQualifiedName();
+		final String name = constructorBinding.getName();
+		final String qualifiedName = String.format( "%s.%s", classQualifiedName, name );
+
+		getContext().addMethodCalled( qualifiedName );
+
+		// TODO ver como faz pra pegar o nome das variaveis
+		final ITypeBinding[] parameterTypes = constructorBinding.getParameterTypes();
+		for (final ITypeBinding iTypeBinding : parameterTypes)
+		{
+			final String varQualifiedName = iTypeBinding.getQualifiedName();
+			getContext().addVariableTypeUsed( varQualifiedName );
+		}
+
 		return true;
 	}
 
@@ -97,7 +121,18 @@ public class MethodVisitor extends ASTVisitor
 		{
 			final ITypeBinding declaringClassBinding = methodBinding.getDeclaringClass();
 
-			fullyQualifiedName = declaringClassBinding.getQualifiedName();
+			final String name = methodBinding.getName();
+
+			final String declaringClassName = declaringClassBinding.getQualifiedName();
+
+			fullyQualifiedName = String.format( "%s.%s", declaringClassName, name );
+
+			final ITypeBinding[] exceptionTypes = methodBinding.getExceptionTypes();
+			for (final ITypeBinding iTypeBinding : exceptionTypes)
+			{
+				final String qualifiedName = iTypeBinding.getQualifiedName();
+				getContext().addExceptionThrown( qualifiedName );
+			}
 		}
 
 		getContext().addMethodCalled( fullyQualifiedName );

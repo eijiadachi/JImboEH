@@ -70,6 +70,11 @@ public class MethodContext
 		this.getExceptionsOnInterface().add( declaredException );
 	}
 
+	public void addExceptionThrown(final String exceptionThrown)
+	{
+		this.getExceptionsThrown().add( exceptionThrown );
+	}
+
 	public void addMethodCalled(final String qualifiedName)
 	{
 		this.getMethodsCalled().add( qualifiedName );
@@ -143,7 +148,7 @@ public class MethodContext
 
 	}
 
-	private void addVariableTypeUsed(final String variableStr)
+	public void addVariableTypeUsed(final String variableStr)
 	{
 		this.getVariablesTypesUsed().add( variableStr );
 	}
