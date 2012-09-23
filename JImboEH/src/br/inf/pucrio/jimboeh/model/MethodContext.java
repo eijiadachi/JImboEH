@@ -220,6 +220,10 @@ public class MethodContext
 
 	private String getQualifiedName(final Type type)
 	{
+		if (type == null)
+		{
+			return "";
+		}
 		final ITypeBinding binding = type.resolveBinding();
 		if (binding == null)
 		{

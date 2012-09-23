@@ -74,7 +74,7 @@ public class UtilAST
 		final int indexOf = unitSource.indexOf( methodSource );
 
 		final int length = methodSource.length();
-		final ASTNode currentNode = NodeFinder.perform( rootNode, indexOf, length );
+		final ASTNode currentNode = NodeFinder.perform( rootNode, indexOf + 1, length - 1 );
 
 		final MethodDeclaration methodDeclarationParent = getMethodDeclarationParent( currentNode );
 

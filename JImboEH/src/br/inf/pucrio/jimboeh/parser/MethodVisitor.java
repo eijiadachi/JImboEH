@@ -95,9 +95,12 @@ public class MethodVisitor extends ASTVisitor
 			getContext().addExceptionOnInterface( exceptionQualifiedName );
 		}
 
-		final Type returnType = node.getReturnType2();
+		if (!node.isConstructor())
+		{
+			final Type returnType = node.getReturnType2();
 
-		getContext().addReturnedType( returnType );
+			getContext().addReturnedType( returnType );
+		}
 
 		final List<SingleVariableDeclaration> parameters = node.parameters();
 
