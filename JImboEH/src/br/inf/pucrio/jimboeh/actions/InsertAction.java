@@ -7,14 +7,12 @@ import java.util.TreeSet;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -28,52 +26,12 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 import br.inf.pucrio.jimboeh.Activator;
-import br.inf.pucrio.jimboeh.model.MethodContext;
-import br.inf.pucrio.jimboeh.parser.MethodVisitor;
 import br.inf.pucrio.jimboeh.ui.DialogConstructor;
-import br.inf.pucrio.jimboeh.util.UtilAST;
 
 public class InsertAction implements IObjectActionDelegate
 {
 
 	private ISelection selection;
-
-	private void insertSelectedElements(final Set<IMethod> methodsToIndex, final IProgressMonitor monitor)
-			throws JavaModelException
-	{
-		monitor.beginTask( "Indexing methods", methodsToIndex.size() );
-
-		for (final IMethod method : methodsToIndex)
-		{
-			final MethodDeclaration methodNode = UtilAST.astNode( method );
-
-			if (methodNode == null)
-			{
-				UtilAST.astNode( method );
-				continue;
-			}
-
-			final MethodVisitor visitor = new MethodVisitor();
-
-			methodNode.accept( visitor );
-
-			final MethodContext context = visitor.getContext();
-
-			final String contextStr = context.toString();
-
-			final String methodName = method.getElementName();
-
-			final String message = String.format( "Inserting method: %s\n\n%s", methodName, contextStr );
-
-			monitor.worked( 1 );
-		}
-
-		final String message = String.format( "Inserting %s methods.\n", methodsToIndex.size() );
-
-		monitor.done();
-
-		MessageDialog.openInformation( null, "JImboEH", message );
-	}
 
 	private void processSelection(final Object[] selectedElements, final Set<IMethod> methodsToIndex)
 			throws JavaModelException
@@ -95,7 +53,6 @@ public class InsertAction implements IObjectActionDelegate
 					final Object[] selectedChild = new Object[] { child };
 					processSelection( selectedChild, methodsToIndex );
 				}
-
 			}
 		}
 
