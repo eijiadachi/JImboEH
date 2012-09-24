@@ -1,7 +1,7 @@
 package br.inf.pucrio.jimboeh.query;
 
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.lucene.index.Term;
@@ -11,7 +11,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 
 import br.inf.pucrio.jimboeh.model.MethodContext;
-import br.inf.pucrio.jimboeh.util.UtilBean;
 
 public class QueryBuilder
 {
@@ -19,36 +18,44 @@ public class QueryBuilder
 	{
 		final BooleanQuery bQuery = new BooleanQuery();
 
-		final Map<String, Object> contextDescription = UtilBean.describeBean( context );
+		final Set<String> exceptionsToHandle = context.getExceptionsThrown();
 
-		contextDescription.remove( "codeSnippet" );
+		final List<TermQuery> exceptionsHandledTermQueryList = buildTermQueryList( exceptionsToHandle,
+				"exceptionsHandled", 5.0f );
 
-		final Set<Entry<String, Object>> entrySet = contextDescription.entrySet();
-		for (final Entry<String, Object> entry : entrySet)
+		final Set<String> methodsCalled = context.getMethodsCalled();
+		final List<TermQuery> methodsCalledTermQueryList = buildTermQueryList( methodsCalled, "methodsCalled", 1.0f );
+
+		final Set<String> variablesTypesUsed = context.getVariablesTypesUsed();
+
+		final List<TermQuery> variablesTypesUsedTermQueryList = buildTermQueryList( variablesTypesUsed,
+				"variablesTypesUsed", 1.0f );
+
+		final List<TermQuery> allTermsQueryList = new ArrayList<TermQuery>();
+		allTermsQueryList.addAll( exceptionsHandledTermQueryList );
+		allTermsQueryList.addAll( methodsCalledTermQueryList );
+		allTermsQueryList.addAll( variablesTypesUsedTermQueryList );
+
+		for (final TermQuery termQuery : allTermsQueryList)
 		{
-			final String name = entry.getKey();
-			final Object value = entry.getValue();
-
-			if (value instanceof Iterable)
-			{
-				final Iterable<?> iterable = (Iterable<?>) value;
-				for (final Object object : iterable)
-				{
-					final String objectStr = String.valueOf( object );
-					final Term term = new Term( name, objectStr );
-					final TermQuery termQuery = new TermQuery( term );
-					bQuery.add( termQuery, BooleanClause.Occur.SHOULD );
-				}
-			}
-			else
-			{
-				final String valueStr = String.valueOf( value );
-				final Term term = new Term( name, valueStr );
-				final TermQuery termQuery = new TermQuery( term );
-				bQuery.add( termQuery, BooleanClause.Occur.SHOULD );
-			}
+			bQuery.add( termQuery, BooleanClause.Occur.SHOULD );
 		}
 
 		return bQuery;
+	}
+
+	private static <T extends Object> List<TermQuery> buildTermQueryList(final Set<T> termValues,
+			final String termName, final Float termBoost)
+	{
+		final List<TermQuery> termQueryList = new ArrayList<TermQuery>();
+		for (final T termValue : termValues)
+		{
+			final String termValueStr = String.valueOf( termValue );
+			final Term term = new Term( termName, termValueStr );
+			final TermQuery termQuery = new TermQuery( term );
+			termQuery.setBoost( termBoost );
+			termQueryList.add( termQuery );
+		}
+		return termQueryList;
 	}
 }

@@ -40,6 +40,27 @@ public class InsertAction implements IObjectActionDelegate
 
 	private ISelection selection;
 
+	private final Comparator<IMethod> comparator = new Comparator<IMethod>()
+	{
+
+		private String buildFullyQualifiedName(final IMethod arg0)
+		{
+			final String typeFullyQualifiedName1 = arg0.getDeclaringType().getFullyQualifiedName();
+			final String elementName1 = arg0.getElementName();
+			final String elementQualifiedName1 = String.format( "%s.%s", typeFullyQualifiedName1, elementName1 );
+			return elementQualifiedName1;
+		}
+
+		// TODO ver como nao inserir esse cara, pois ele nao trata
+		@Override
+		public int compare(final IMethod arg0, final IMethod arg1)
+		{
+			final String qualifiedName0 = buildFullyQualifiedName( arg0 );
+			final String qualifiedName1 = buildFullyQualifiedName( arg1 );
+			return qualifiedName0.compareTo( qualifiedName1 );
+		}
+	};
+
 	private void processSelection(final Object[] selectedElements, final Set<IMethod> methodsToIndex)
 			throws JavaModelException
 	{
@@ -62,7 +83,6 @@ public class InsertAction implements IObjectActionDelegate
 				}
 			}
 		}
-
 	}
 
 	@Override
@@ -78,25 +98,7 @@ public class InsertAction implements IObjectActionDelegate
 
 			final Object firstElement = structuredSelection.getFirstElement();
 
-			final Set<IMethod> methodsToIndex = new TreeSet<IMethod>( new Comparator<IMethod>()
-			{
-
-				private String buildFullyQualifiedName(final IMethod arg0)
-				{
-					final String typeFullyQualifiedName1 = arg0.getDeclaringType().getFullyQualifiedName();
-					final String elementName1 = arg0.getElementName();
-					final String elementQualifiedName1 = String.format( "%s.%s", typeFullyQualifiedName1, elementName1 );
-					return elementQualifiedName1;
-				}
-
-				@Override
-				public int compare(final IMethod arg0, final IMethod arg1)
-				{
-					final String qualifiedName0 = buildFullyQualifiedName( arg0 );
-					final String qualifiedName1 = buildFullyQualifiedName( arg1 );
-					return qualifiedName0.compareTo( qualifiedName1 );
-				}
-			} );
+			final Set<IMethod> methodsToIndex = new TreeSet<IMethod>( comparator );
 
 			if (firstElement instanceof IMethod)
 			{

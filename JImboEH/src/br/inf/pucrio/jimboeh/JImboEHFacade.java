@@ -39,6 +39,9 @@ public class JImboEHFacade
 
 		final Query query = QueryBuilder.buildQuery( context );
 
+		final String logMessage = String.format( "Recommending.\nContext: %sQuery:\n%s", context, query );
+		Activator.getDefault().getLog().log( new Status( IStatus.INFO, Activator.PLUGIN_ID, logMessage ) );
+
 		final IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
 		final String path = preferenceStore.getString( PreferenceConstants.P_PATH );
 		final int maxResults = preferenceStore.getInt( PreferenceConstants.P_INTEGER );
