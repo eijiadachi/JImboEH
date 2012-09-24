@@ -1,8 +1,10 @@
 package br.inf.pucrio.jimboeh.actions;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
+import org.apache.lucene.index.IndexWriter;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -11,20 +13,24 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.statushandlers.StatusManager;
 
 import br.inf.pucrio.jimboeh.Activator;
 import br.inf.pucrio.jimboeh.model.MethodContext;
 import br.inf.pucrio.jimboeh.parser.MethodVisitor;
 import br.inf.pucrio.jimboeh.util.UtilAST;
+import br.inf.pucrio.jimboeh.util.UtilIndex;
 
 public class InsertActionRunnable implements IRunnableWithProgress
 {
 	public ISelection selection;
 	private final Set<IMethod> methodsToIndex;
+	private final IndexWriter writer;
 
-	public InsertActionRunnable(final Set<IMethod> methodsToIndex)
+	public InsertActionRunnable(final Set<IMethod> methodsToIndex, final IndexWriter writer)
 	{
 		this.methodsToIndex = methodsToIndex;
+		this.writer = writer;
 	}
 
 	@Override
@@ -49,22 +55,26 @@ public class InsertActionRunnable implements IRunnableWithProgress
 
 				final MethodContext context = visitor.getContext();
 
+				if (context == null)
+				{
+					continue;
+				}
+
 				final Set<String> exceptionsHandled = context.getExceptionsHandled();
+
 				final boolean handlesException = !exceptionsHandled.isEmpty();
+
 				if (handlesException)
 				{
-					final String contextStr = context.toString();
-
-					final String methodName = method.getElementName();
-
-					final String message = String.format( "Inserting method: %s\n\n%s", methodName, contextStr );
-				}
-				else
-				{
-					final String message = String.format( "Ignoring: '%s.%s'", context.getEnclosingClass(),
-							context.getMethodName() );
-					final IStatus status = new Status( IStatus.INFO, Activator.PLUGIN_ID, message );
-					Activator.getDefault().getLog().log( status );
+					try
+					{
+						UtilIndex.insertIntoIndex( writer, context );
+					}
+					catch (final IOException e)
+					{
+						final IStatus status = new Status( IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e );
+						Activator.getDefault().getLog().log( status );
+					}
 				}
 
 				monitor.worked( 1 );
@@ -74,7 +84,22 @@ public class InsertActionRunnable implements IRunnableWithProgress
 		}
 		catch (final CoreException e)
 		{
-			e.printStackTrace();
+			StatusManager.getManager().handle( e.getStatus(), StatusManager.SHOW | StatusManager.LOG );
+		}
+		finally
+		{
+			if (writer != null)
+			{
+				try
+				{
+					writer.close();
+				}
+				catch (final IOException e)
+				{
+					final Status status = new Status( IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e );
+					Activator.getDefault().getLog().log( status );
+				}
+			}
 		}
 	}
 }

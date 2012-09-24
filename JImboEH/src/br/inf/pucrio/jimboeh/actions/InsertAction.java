@@ -1,10 +1,14 @@
 package br.inf.pucrio.jimboeh.actions;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.store.LockObtainFailedException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
@@ -16,6 +20,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -26,7 +31,9 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.statushandlers.StatusManager;
 
 import br.inf.pucrio.jimboeh.Activator;
+import br.inf.pucrio.jimboeh.preferences.PreferenceConstants;
 import br.inf.pucrio.jimboeh.ui.DialogConstructor;
+import br.inf.pucrio.jimboeh.util.UtilIndex;
 
 public class InsertAction implements IObjectActionDelegate
 {
@@ -63,6 +70,10 @@ public class InsertAction implements IObjectActionDelegate
 	{
 		try
 		{
+			final IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+			final String path = preferenceStore.getString( PreferenceConstants.P_PATH );
+			final IndexWriter writer = UtilIndex.createIndexWriter( path );
+
 			final StructuredSelection structuredSelection = (StructuredSelection) selection;
 
 			final Object firstElement = structuredSelection.getFirstElement();
@@ -111,7 +122,9 @@ public class InsertAction implements IObjectActionDelegate
 			final ProgressMonitorDialog progressMonitorDialog = new ProgressMonitorDialog( PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow().getShell() );
 
-			progressMonitorDialog.run( true, true, new InsertActionRunnable( methodsToIndex ) );
+			final InsertActionRunnable runnable = new InsertActionRunnable( methodsToIndex, writer );
+
+			progressMonitorDialog.run( true, true, runnable );
 
 			final String message = String.format( "Inserted %s methods.\n", methodsToIndex.size() );
 
@@ -133,6 +146,24 @@ public class InsertAction implements IObjectActionDelegate
 			final ILog log = Activator.getDefault().getLog();
 			log.log( new Status( IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage() ) );
 		}
+		catch (final CorruptIndexException e)
+		{
+			final IStatus status = new Status( IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e );
+			final StatusManager statusManager = StatusManager.getManager();
+			statusManager.handle( status, StatusManager.SHOW | StatusManager.LOG );
+		}
+		catch (final LockObtainFailedException e)
+		{
+			final IStatus status = new Status( IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e );
+			final StatusManager statusManager = StatusManager.getManager();
+			statusManager.handle( status, StatusManager.SHOW | StatusManager.LOG );
+		}
+		catch (final IOException e)
+		{
+			final IStatus status = new Status( IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e );
+			final StatusManager statusManager = StatusManager.getManager();
+			statusManager.handle( status, StatusManager.SHOW | StatusManager.LOG );
+		}
 	}
 
 	@Override
@@ -144,8 +175,7 @@ public class InsertAction implements IObjectActionDelegate
 	@Override
 	public void setActivePart(final IAction action, final IWorkbenchPart targetPart)
 	{
-		// TODO Auto-generated method stub
-
+		// There is nothing to do
 	}
 
 }

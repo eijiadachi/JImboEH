@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NodeFinder;
 
@@ -65,31 +66,23 @@ public class UtilAST
 
 		final ASTNode rootNode = astParser.createAST( null );
 
-		// final CompilationUnit compilationUnitNode = (CompilationUnit)
-		// rootNode;
+		if (method.isResolved())
+		{
+			final String key = method.getKey();
 
-		final String unitSource = compilationUnit.getSource();
-		final String methodSource = method.getSource();
+			final CompilationUnit compilationUnitNode = (CompilationUnit) rootNode;
+			final ASTNode javaElement = compilationUnitNode.findDeclaringNode( key );
 
-		final int indexOf = unitSource.indexOf( methodSource );
+			final MethodDeclaration methodDeclarationNode = (MethodDeclaration) javaElement;
 
-		final int length = methodSource.length();
-		final ASTNode currentNode = NodeFinder.perform( rootNode, indexOf + 1, length - 1 );
+			return methodDeclarationNode;
+		}
+
+		final ASTNode currentNode = NodeFinder.perform( rootNode, method.getSourceRange() );
 
 		final MethodDeclaration methodDeclarationParent = getMethodDeclarationParent( currentNode );
 
 		return methodDeclarationParent;
-
-		// TODO ver resposta do StackOverflow
-		// final String key = method.getKey();
-		//
-		// final ASTNode javaElement = compilationUnitNode.findDeclaringNode(
-		// key );
-		//
-		// final MethodDeclaration methodDeclarationNode = (MethodDeclaration)
-		// javaElement;
-		//
-		// return methodDeclarationNode;
 	}
 
 	public static MethodDeclaration getMethodDeclarationParent(final ASTNode node)

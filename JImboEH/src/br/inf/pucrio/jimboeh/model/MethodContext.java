@@ -1,8 +1,9 @@
 package br.inf.pucrio.jimboeh.model;
 
-import java.lang.reflect.Field;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.Expression;
@@ -12,6 +13,8 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+
+import br.inf.pucrio.jimboeh.util.UtilBean;
 
 public class MethodContext
 {
@@ -312,25 +315,18 @@ public class MethodContext
 	public String toString()
 	{
 		final StringBuilder builder = new StringBuilder();
-		final Field[] declaredFields = MethodContext.class.getDeclaredFields();
-		for (final Field field : declaredFields)
+
+		final Map<String, Object> beanDescription = UtilBean.describeBean( this );
+
+		final Set<Entry<String, Object>> entrySet = beanDescription.entrySet();
+		for (final Entry<String, Object> entry : entrySet)
 		{
-			try
-			{
-				final String fieldName = field.getName();
-				final Object fieldValue = field.get( this );
-				final String str = String.format( "%s - %s\n", fieldName, fieldValue );
-				builder.append( str );
-			}
-			catch (final IllegalArgumentException e)
-			{
-				e.printStackTrace();
-			}
-			catch (final IllegalAccessException e)
-			{
-				e.printStackTrace();
-			}
+			final String fieldName = entry.getKey();
+			final Object fieldValue = entry.getValue();
+			final String str = String.format( "%s - %s\n", fieldName, fieldValue );
+			builder.append( str );
 		}
+
 		return builder.toString();
 	}
 }
