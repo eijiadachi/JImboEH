@@ -2,6 +2,9 @@ package br.inf.pucrio.jimboeh.parser;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -78,6 +81,23 @@ public class MethodVisitor extends ASTVisitor
 	{
 		// TODO add declaringPackage to methodContext
 		final IMethodBinding binding = node.resolveBinding();
+
+		if (binding == null)
+		{
+			return false;
+		}
+
+		final IJavaElement javaElement = binding.getJavaElement();
+		final IMethod method = (IMethod) javaElement;
+		try
+		{
+			final String sourceCodeSnippet = method.getSource();
+			getContext().setCodeSnippet( sourceCodeSnippet );
+		}
+		catch (final JavaModelException e)
+		{
+			return false;
+		}
 
 		final String methodName = binding.getName();
 

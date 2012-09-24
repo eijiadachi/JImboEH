@@ -81,6 +81,8 @@ public final class UtilIndex
 	public static void insertIntoIndex(final IndexWriter writer, final MethodContext context)
 			throws CorruptIndexException, IOException
 	{
+		final Document doc = new Document();
+
 		final Map<String, Object> contextDescription = UtilBean.describeBean( context );
 
 		final Set<Entry<String, Object>> entrySet = contextDescription.entrySet();
@@ -89,7 +91,6 @@ public final class UtilIndex
 			final String name = entry.getKey();
 			final Object value = entry.getValue();
 
-			final Document doc = new Document();
 			if (value instanceof Iterable)
 			{
 				final Iterable<?> iterable = (Iterable<?>) value;
@@ -107,9 +108,9 @@ public final class UtilIndex
 
 				doc.add( new Field( name, valueStr, Store.YES, Index.NOT_ANALYZED, TermVector.WITH_POSITIONS_OFFSETS ) );
 			}
-
-			writer.addDocument( doc );
 		}
+
+		writer.addDocument( doc );
 
 		writer.commit();
 	}

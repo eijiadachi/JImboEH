@@ -138,7 +138,7 @@ public class SearchResultView extends ViewPart
 				{
 					final DetailedResultView detailedResultView = UtilUI.getDetailedResultView();
 
-					final String str = doc.get( "snippet" );
+					final String str = doc.get( "codeSnippet" );
 
 					detailedResultView.setContent( str );
 				}

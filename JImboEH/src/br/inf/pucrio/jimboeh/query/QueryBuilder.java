@@ -21,6 +21,8 @@ public class QueryBuilder
 
 		final Map<String, Object> contextDescription = UtilBean.describeBean( context );
 
+		contextDescription.remove( "codeSnippet" );
+
 		final Set<Entry<String, Object>> entrySet = contextDescription.entrySet();
 		for (final Entry<String, Object> entry : entrySet)
 		{

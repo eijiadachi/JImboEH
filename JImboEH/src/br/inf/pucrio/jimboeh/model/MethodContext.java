@@ -34,6 +34,8 @@ public class MethodContext
 
 	private Set<String> parametersIdentifiers;
 
+	private String codeSnippet;
+
 	private String methodName;
 
 	private String returnedType;
@@ -328,5 +330,15 @@ public class MethodContext
 		}
 
 		return builder.toString();
+	}
+
+	public String getCodeSnippet()
+	{
+		return codeSnippet;
+	}
+
+	public void setCodeSnippet(String codeSnippet)
+	{
+		this.codeSnippet = codeSnippet;
 	}
 }
