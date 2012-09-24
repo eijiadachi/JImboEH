@@ -11,13 +11,14 @@ import java.util.TreeMap;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 
 import br.inf.pucrio.jimboeh.model.MethodContext;
 
 public class QueryBuilder
 {
-	public static BooleanQuery buildQuery(final MethodContext context)
+	public static Query buildQuery(final MethodContext context)
 	{
 		final BooleanQuery bQuery = new BooleanQuery();
 
@@ -49,7 +50,9 @@ public class QueryBuilder
 			}
 		}
 
-		return bQuery;
+		final TermQuery query = new TermQuery( new Term( "handles", "IOException" ) );
+
+		return query;
 	}
 
 	private static Map<String, Object> describeBean(final Object object)

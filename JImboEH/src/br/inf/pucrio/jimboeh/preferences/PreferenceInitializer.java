@@ -17,6 +17,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
 		final IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		store.setDefault( PreferenceConstants.P_PATH, "/" );
 		store.setDefault( PreferenceConstants.P_BOOLEAN, false );
+		store.setDefault( PreferenceConstants.P_INTEGER, 10 );
 	}
 
 }
