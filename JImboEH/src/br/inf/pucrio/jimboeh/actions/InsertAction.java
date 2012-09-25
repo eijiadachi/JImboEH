@@ -128,7 +128,9 @@ public class InsertAction implements IObjectActionDelegate
 
 			progressMonitorDialog.run( true, true, runnable );
 
-			final String message = String.format( "Inserted %s methods.\n", methodsToIndex.size() );
+			final int insertedCount = runnable.getInsertedCount();
+
+			final String message = String.format( "Inserted %s methods.\n", insertedCount );
 
 			MessageDialog.openInformation( null, "JImboEH", message );
 		}

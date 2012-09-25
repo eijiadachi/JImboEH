@@ -6,13 +6,17 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -23,12 +27,145 @@ import br.inf.pucrio.jimboeh.model.MethodContext;
 
 public class MethodVisitor extends ASTVisitor
 {
+	private final MethodContext context;
 
-	private final MethodContext context = new MethodContext();
+	private final boolean ignoreTrivialHandlers;
+
+	private boolean implementsTrivialHandler;
+
+	public MethodVisitor()
+	{
+		this( false );
+	}
+
+	public MethodVisitor(final boolean b)
+	{
+		ignoreTrivialHandlers = b;
+		context = new MethodContext();
+	}
+
+	private boolean compareFullyQualifiedName(final MethodInvocation methodInvocation, final String methodNameStr)
+	{
+		final SimpleName methodName = methodInvocation.getName();
+
+		final String fullyQualifiedName = methodName.getFullyQualifiedName();
+
+		final boolean isEqual = fullyQualifiedName.equals( methodNameStr );
+
+		return isEqual;
+
+	}
 
 	public MethodContext getContext()
 	{
 		return context;
+	}
+
+	private boolean isAssertion(final MethodInvocation methodInvocation)
+	{
+		final SimpleName methodName = methodInvocation.getName();
+
+		final String fullyQualifiedName = methodName.getFullyQualifiedName();
+
+		final boolean isAssertion = fullyQualifiedName.startsWith( "assert" );
+
+		return isAssertion;
+	}
+
+	private boolean isEmptyCatch(final CatchClause node)
+	{
+		final Block body = node.getBody();
+		final List<?> statements = body.statements();
+		final boolean isEmptyCatch = statements.isEmpty();
+
+		return isEmptyCatch;
+	}
+
+	private boolean isFail(final MethodInvocation methodInvocation)
+	{
+		final boolean isFail = compareFullyQualifiedName( methodInvocation, "fail" );
+
+		return isFail;
+	}
+
+	private boolean isPrintln(final MethodInvocation methodInvocation)
+	{
+		final Expression expression = methodInvocation.getExpression();
+
+		if (expression != null && expression instanceof QualifiedName)
+		{
+			final String expressionName = ((QualifiedName) expression).getFullyQualifiedName();
+
+			final boolean isPrintln = (expressionName.equals( "System.out" ) || expressionName.equals( "System.err" ))
+					&& compareFullyQualifiedName( methodInvocation, "println" );
+
+			return isPrintln;
+		}
+
+		return false;
+	}
+
+	private boolean isPrintStackTrace(final MethodInvocation methodInvocation)
+	{
+		final boolean isPrintStackTrace = compareFullyQualifiedName( methodInvocation, "printStackTrace" );
+
+		return isPrintStackTrace;
+	}
+
+	public boolean isTrivialHandler()
+	{
+		return implementsTrivialHandler;
+	}
+
+	private boolean isTrivialHandler(final CatchClause node)
+	{
+		final Block body = node.getBody();
+		final List<?> statements = body.statements();
+
+		boolean isTrivial = true;
+		for (final Object statement : statements)
+		{
+			if (statement instanceof ExpressionStatement)
+			{
+				final ExpressionStatement expressionStatement = (ExpressionStatement) statement;
+
+				final Expression expression = expressionStatement.getExpression();
+
+				// if all expressions within the catch block are invocation
+				// to one of the methods: printStackTrace(), or fail() or
+				// println(), then this catch block is considered as being
+				// trivial
+				if (expression instanceof MethodInvocation)
+				{
+					final MethodInvocation methodInvocation = (MethodInvocation) expression;
+
+					isTrivial &= isPrintStackTrace( methodInvocation ) || isFail( methodInvocation )
+							|| isPrintln( methodInvocation ) || isAssertion( methodInvocation );
+				}
+				else
+				{
+					isTrivial = false;
+					break;
+				}
+
+			}
+			else if (statement instanceof ReturnStatement)
+			{
+				isTrivial &= true;
+			}
+			else
+			{
+				isTrivial = false;
+				break;
+			}
+		}
+
+		return isTrivial;
+	}
+
+	public void setImplementsTrivialHandler(final boolean implementsTrivialHandler)
+	{
+		this.implementsTrivialHandler = implementsTrivialHandler;
 	}
 
 	@Override
@@ -37,6 +174,8 @@ public class MethodVisitor extends ASTVisitor
 		final SingleVariableDeclaration exceptionDeclaration = node.getException();
 
 		getContext().addExceptionHandled( exceptionDeclaration );
+
+		setImplementsTrivialHandler( isTrivialHandler( node ) || isEmptyCatch( node ) );
 
 		return true;
 	}

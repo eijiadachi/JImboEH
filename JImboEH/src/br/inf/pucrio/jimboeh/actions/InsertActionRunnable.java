@@ -26,11 +26,13 @@ public class InsertActionRunnable implements IRunnableWithProgress
 	public ISelection selection;
 	private final Set<IMethod> methodsToIndex;
 	private final IndexWriter writer;
+	private int insertedCount;
 
 	public InsertActionRunnable(final Set<IMethod> methodsToIndex, final IndexWriter writer)
 	{
 		this.methodsToIndex = methodsToIndex;
 		this.writer = writer;
+		setInsertedCount( 0 );
 	}
 
 	@Override
@@ -49,9 +51,14 @@ public class InsertActionRunnable implements IRunnableWithProgress
 					continue;
 				}
 
-				final MethodVisitor visitor = new MethodVisitor();
+				final MethodVisitor visitor = new MethodVisitor( true );
 
 				methodNode.accept( visitor );
+
+				if (visitor.isTrivialHandler())
+				{
+					continue;
+				}
 
 				final MethodContext context = visitor.getContext();
 
@@ -69,6 +76,7 @@ public class InsertActionRunnable implements IRunnableWithProgress
 					try
 					{
 						UtilIndex.insertIntoIndex( writer, context );
+						setInsertedCount( getInsertedCount() + 1 );
 					}
 					catch (final IOException e)
 					{
@@ -101,5 +109,15 @@ public class InsertActionRunnable implements IRunnableWithProgress
 				}
 			}
 		}
+	}
+
+	public int getInsertedCount()
+	{
+		return insertedCount;
+	}
+
+	public void setInsertedCount(int insertedCount)
+	{
+		this.insertedCount = insertedCount;
 	}
 }
