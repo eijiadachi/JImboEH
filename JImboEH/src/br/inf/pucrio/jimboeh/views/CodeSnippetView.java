@@ -9,22 +9,17 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 @SuppressWarnings("restriction")
-public class DetailedResultView extends ViewPart
+public class CodeSnippetView extends ViewPart
 {
 
 	class NameSorter extends ViewerSorter
@@ -57,33 +52,6 @@ public class DetailedResultView extends ViewPart
 		}
 	}
 
-	class ViewLabelProvider extends LabelProvider implements ITableLabelProvider
-	{
-		@Override
-		public Image getColumnImage(final Object obj, final int index)
-		{
-			return getImage( obj );
-		}
-
-		@Override
-		public String getColumnText(final Object obj, final int index)
-		{
-			final String baseStr = "public" + x++;
-
-			final String str = String.format( baseStr, obj );
-
-			return str;
-		}
-
-		@Override
-		public Image getImage(final Object obj)
-		{
-			return PlatformUI.getWorkbench().getSharedImages().getImage( ISharedImages.IMG_OBJS_INFO_TSK );
-		}
-	}
-
-	static int x = 0;
-
 	private ScrolledComposite container;
 
 	public static final String ID = "jimboeh.views.DetailedResultView";
@@ -92,7 +60,7 @@ public class DetailedResultView extends ViewPart
 
 	private String content;
 
-	public DetailedResultView()
+	public CodeSnippetView()
 	{
 	}
 

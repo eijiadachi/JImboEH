@@ -8,6 +8,7 @@
             id="JImboEH.CompilationUnitContribution"
             targetID="org.eclipse.jdt.ui.CompilationUnitEditor.EditorContext">
          <menu
+               icon="icons/jimboeh.png"
                id="JImboEH.menu1"
                label="JImboEH"
                path="additions">
@@ -16,10 +17,11 @@
             </separator>
          </menu>
           <action
-               class="br.inf.pucrio.jimboeh.actions.SearchAction"
-               id="JImboEH.SearchAction"
-               label="Search"
-               menubarPath="JImboEH.menu1/group1">
+                class="br.inf.pucrio.jimboeh.actions.SearchAction"
+                icon="icons/search.png"
+                id="JImboEH.SearchAction"
+                label="Search"
+                menubarPath="JImboEH.menu1/group1">
          </action>
       </viewerContribution>
    </extension>
@@ -32,16 +34,16 @@
       <view
             category="JImboEH"
             class="br.inf.pucrio.jimboeh.views.SearchResultView"
-            icon="icons/sample.gif"
+            icon="icons/result.png"
             id="jimboeh.views.SearchResultView"
-            name="Recommendations View">
+            name="Result">
       </view>
       <view
             category="JImboEH"
-            class="br.inf.pucrio.jimboeh.views.DetailedResultView"
-            icon="icons/sample.gif"
+            class="br.inf.pucrio.jimboeh.views.CodeSnippetView"
+            icon="icons/code.gif"
             id="jimboeh.views.DetailedResultView"
-            name="Detailed Result"
+            name="Code Snippet"
             restorable="true">
       </view>
    </extension>
@@ -64,6 +66,7 @@
             id="JImboEH.IMethod"
             objectClass="org.eclipse.jdt.core.IMethod">
          <menu
+               icon="icons/jimboeh.png"
                id="JImboEH.insertMethodMenu"
                label="JImboEH">
          </menu>
@@ -82,6 +85,7 @@
             id="JImboEH.IProjectContribution"
             objectClass="org.eclipse.core.resources.IProject">
          <menu
+               icon="icons/jimboeh.png"
                id="JImboEH.InsertProjectMenu"
                label="JImboEH">
          </menu>
@@ -100,6 +104,7 @@
             id="JImboEH.ICompilationUnitContribution"
             objectClass="org.eclipse.jdt.core.ICompilationUnit">
          <menu
+               icon="icons/jimboeh.png"
                id="JImboEH.InsertClassMenu"
                label="JImboEH">
          </menu>

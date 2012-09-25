@@ -1,10 +1,13 @@
 package br.inf.pucrio.jimboeh.views;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.lucene.document.Document;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -13,12 +16,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -72,7 +77,11 @@ public class SearchResultView extends ViewPart
 		public String getColumnText(final Object obj, final int index)
 		{
 			final Document doc = (Document) obj;
-			final String str = doc.get( "methodName" );
+			final String methodName = doc.get( "methodName" );
+			final String[] exceptions = doc.getValues( "exceptionsHandled" );
+			final List<String> exceptionsList = Arrays.asList( exceptions );
+
+			final String str = String.format( "%s handles %s", methodName, exceptionsList );
 
 			return str;
 		}
@@ -80,7 +89,7 @@ public class SearchResultView extends ViewPart
 		@Override
 		public Image getImage(final Object obj)
 		{
-			return PlatformUI.getWorkbench().getSharedImages().getImage( ISharedImages.IMG_OBJS_INFO_TSK );
+			return PlatformUI.getWorkbench().getSharedImages().getImage( ISharedImages.IMG_ETOOL_DEF_PERSPECTIVE );
 		}
 	}
 
@@ -92,8 +101,6 @@ public class SearchResultView extends ViewPart
 
 	private List<Document> content;
 
-	static int x = 0;
-
 	public SearchResultView()
 	{
 	}
@@ -101,11 +108,58 @@ public class SearchResultView extends ViewPart
 	@Override
 	public void createPartControl(final Composite parent)
 	{
-		viewer = new TableViewer( parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL );
-		viewer.setContentProvider( new ViewContentProvider() );
+		viewer = new TableViewer( parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER );
+		viewer.setContentProvider( ArrayContentProvider.getInstance() );
 		viewer.setLabelProvider( new ViewLabelProvider() );
 		viewer.setSorter( new NameSorter() );
-		viewer.setInput( getViewSite() );
+		if (content != null)
+		{
+			viewer.setInput( content );
+		}
+		else
+		{
+			viewer.setInput( getViewSite() );
+		}
+
+		final Table table = viewer.getTable();
+		table.setHeaderVisible( true );
+		table.setLinesVisible( true );
+
+		final TableViewerColumn col1 = new TableViewerColumn( viewer, SWT.NONE );
+		col1.getColumn().setWidth( 200 );
+		col1.getColumn().setText( "Method Name:" );
+		col1.setLabelProvider( new ColumnLabelProvider()
+		{
+			@Override
+			public String getText(final Object element)
+			{
+				final Document d = (Document) element;
+				final String enclosingClass = d.get( "enclosingClass" );
+				final String methodName = d.get( "methodName" );
+
+				if (enclosingClass == null || enclosingClass.isEmpty())
+				{
+					return methodName;
+				}
+
+				return String.format( "%s.%s", enclosingClass, methodName );
+			}
+		} );
+
+		final TableViewerColumn col2 = new TableViewerColumn( viewer, SWT.NONE );
+		col2.getColumn().setWidth( 300 );
+		col2.getColumn().setText( "Exceptions Handled:" );
+		col2.setLabelProvider( new ColumnLabelProvider()
+		{
+			@Override
+			public String getText(final Object element)
+			{
+				final Document d = (Document) element;
+				final String[] exceptions = d.getValues( "exceptionsHandled" );
+				final List<String> exceptionsList = Arrays.asList( exceptions );
+				return exceptionsList.toString();
+			}
+		} );
 
 		makeActions();
 		hookDoubleClickAction();
@@ -136,7 +190,7 @@ public class SearchResultView extends ViewPart
 
 				try
 				{
-					final DetailedResultView detailedResultView = UtilUI.getDetailedResultView();
+					final CodeSnippetView detailedResultView = UtilUI.getDetailedResultView();
 
 					final String str = doc.get( "codeSnippet" );
 
@@ -163,7 +217,6 @@ public class SearchResultView extends ViewPart
 
 		this.content = content;
 		viewer.setInput( content );
-
 	}
 
 	@Override

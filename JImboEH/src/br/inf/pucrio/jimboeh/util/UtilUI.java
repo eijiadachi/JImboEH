@@ -24,7 +24,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import br.inf.pucrio.jimboeh.Activator;
-import br.inf.pucrio.jimboeh.views.DetailedResultView;
+import br.inf.pucrio.jimboeh.views.CodeSnippetView;
 import br.inf.pucrio.jimboeh.views.SearchResultView;
 
 public class UtilUI
@@ -100,11 +100,11 @@ public class UtilUI
 		return textSelection;
 	}
 
-	public static DetailedResultView getDetailedResultView() throws PartInitException
+	public static CodeSnippetView getDetailedResultView() throws PartInitException
 	{
-		final IViewPart showedView = getViewPart( DetailedResultView.ID );
+		final IViewPart showedView = getViewPart( CodeSnippetView.ID );
 
-		final DetailedResultView resultView = (DetailedResultView) showedView;
+		final CodeSnippetView resultView = (CodeSnippetView) showedView;
 
 		return resultView;
 	}
